@@ -538,6 +538,7 @@ object SQLServerDestinationSeekSinksSpec extends EffectfulQSpec[IO] with BeforeA
           val rkeys = r.keys.toList
           val rtypes = r.values.map(columnType).toList
           val columns = rkeys.zip(rtypes).map((Column[SQLServerType] _).tupled)
+          println(s"columnsOf: id = $idColumn, columns = $columns")
           Pull.output1(columns.filter(c => c.some =!= idColumn))
         case _ =>
           Pull.done

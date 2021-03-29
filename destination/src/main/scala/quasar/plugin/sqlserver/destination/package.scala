@@ -214,4 +214,10 @@ package object destination {
 
     fragment.updateWithLogHandler(log).run
   }
+
+  /** Returns an indexable substitute for the given type, if it isn't indexable. */
+  val indexableSubstitute: SQLServerType => SQLServerType = {
+    case SQLServerType.TEXT => SQLServerType.VARCHAR(MaxIndexableVarchars)
+    case other => other
+  }
 }

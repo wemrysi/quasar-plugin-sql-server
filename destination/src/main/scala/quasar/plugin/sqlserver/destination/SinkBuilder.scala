@@ -20,7 +20,7 @@ import slamdata.Predef._
 
 import quasar.plugin.sqlserver._
 
-import quasar.api.{Column, ColumnType}
+import quasar.api.Column
 import quasar.api.push.OffsetKey
 import quasar.api.resource.ResourcePath
 import quasar.connector.{AppendEvent, DataEvent, IdBatch, MonadResourceErr}
@@ -196,13 +196,16 @@ object SinkBuilder {
   private def ensureIndexableIdColumn(
       id: Column[SQLServerType],
       columns: NonEmptyList[Column[SQLServerType]])
-      : (Column[SQLServerType], NonEmptyList[Column[SQLServerType]]) =
+      : (Column[SQLServerType], NonEmptyList[Column[SQLServerType]]) = {
+    println(s"running for id = $id, columns = $columns")
     Typer.inferScalar(id.tpe)
       .collect {
-        case t @ ColumnType.String if id.tpe.some === Typer.preferred(t) =>
-          val indexableId = id.as(SQLServerType.VARCHAR(MaxIndexableVarchars))
-          val cols = columns.map(c => if (c === id) indexableId else c)
-          (indexableId, cols)
+        case t if Typer.isPreferred(id.tpe, t) =>
+          println(s"updating indexable for t = $t, id = $id")
+          val indexableId = id.map(indexableSubstitute)
+          val updatedColumns = columns.map(c => if (c === id) indexableId else c)
+          (indexableId, updatedColumns)
       }
       .getOrElse((id, columns))
+      }
 }

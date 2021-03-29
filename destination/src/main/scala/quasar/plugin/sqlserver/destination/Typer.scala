@@ -48,6 +48,12 @@ object Typer {
         case _ => None
       }
 
+  /** Returns whether the `SQLServerType` is the preferred representation
+    * for the given scalar type.
+    */
+  def isPreferred(tpe: SQLServerType, forScalar: ColumnType.Scalar): Boolean =
+    preferred(forScalar).exists(_ === tpe)
+
   /** Returns the "preferred" (highest priority) representation for a scalar
     * using maximal values for any parameters, when applicable.
     */
